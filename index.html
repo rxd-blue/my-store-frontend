@@ -1,46 +1,329 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>منتجات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متجر المنتجات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    .product {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 5px;
-      display: inline-block;
+    :root {
+      --primary-color: #4a6da7;
+      --secondary-color: #5d93d8;
+      --accent-color: #ff6b6b;
+      --text-color: #333;
+      --light-bg: #f8f9fa;
+      --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      --transition: all 0.3s ease;
     }
-    .hidden { display: none; }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    header {
+      background-color: #fff;
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    h1 {
+      color: var(--primary-color);
+      font-size: 2rem;
+      margin: 0;
+    }
+    
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .filter-badge {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .filter-badge.empty {
+      background-color: #e9ecef;
+      color: #6c757d;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    
+    .product {
+      background-color: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .product:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .product-image {
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .product-info {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .product-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+    }
+    
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background-color: var(--light-bg);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2rem;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-left: 0.5rem;
+      background-color: #28a745;
+    }
+    
+    .status-dot.connecting {
+      background-color: #ffc107;
+    }
+    
+    .status-dot.error {
+      background-color: #dc3545;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+      
+      .container {
+        padding: 1rem;
+      }
+      
+      header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>منتجاتنا</h1>
+  <div class="container">
+    <header>
+      <h1>متجر المنتجات</h1>
+      <div class="status-indicator">
+        <span class="status-text">متصل بالخادم</span>
+        <div class="status-dot"></div>
+      </div>
+    </header>
+    
+    <div class="filters">
+      <div class="filter-badge empty" id="category-filter">
+        <span>التصنيف: غير محدد</span>
+      </div>
+      <div class="filter-badge empty" id="brand-filter">
+        <span>الماركة: غير محددة</span>
+      </div>
+    </div>
 
-  <div class="product" data-category="تليفونات" data-brand="سامسونج">Samsung A23</div>
-  <div class="product" data-category="تليفونات" data-brand="شاومي">Xiaomi Note 12</div>
-  <div class="product" data-category="غسالات" data-brand="LG">LG WashPro</div>
-  <div class="product" data-category="غسالات" data-brand="سامسونج">Samsung WashX</div>
+    <div class="products-grid">
+      <div class="product" data-category="تليفونات" data-brand="سامسونج">
+        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=1')"></div>
+        <div class="product-info">
+          <h3 class="product-title">Samsung A23</h3>
+          <p>هاتف ذكي بمواصفات رائعة وأداء فائق.</p>
+          <div class="product-meta">
+            <span class="badge">تليفونات</span>
+            <span>سامسونج</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="product" data-category="تليفونات" data-brand="شاومي">
+        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=2')"></div>
+        <div class="product-info">
+          <h3 class="product-title">Xiaomi Note 12</h3>
+          <p>هاتف اقتصادي بمواصفات ممتازة وبطارية قوية.</p>
+          <div class="product-meta">
+            <span class="badge">تليفونات</span>
+            <span>شاومي</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="product" data-category="غسالات" data-brand="LG">
+        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=3')"></div>
+        <div class="product-info">
+          <h3 class="product-title">LG WashPro</h3>
+          <p>غسالة أوتوماتيك بسعة كبيرة وكفاءة عالية.</p>
+          <div class="product-meta">
+            <span class="badge">غسالات</span>
+            <span>LG</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="product" data-category="غسالات" data-brand="سامسونج">
+        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=4')"></div>
+        <div class="product-info">
+          <h3 class="product-title">Samsung WashX</h3>
+          <p>غسالة بتصميم عصري وتقنيات توفير الطاقة.</p>
+          <div class="product-meta">
+            <span class="badge">غسالات</span>
+            <span>سامسونج</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
+    const statusDot = document.querySelector('.status-dot');
+    const statusText = document.querySelector('.status-text');
+    const categoryFilter = document.getElementById('category-filter');
+    const brandFilter = document.getElementById('brand-filter');
+    
     function filterProducts(category, brand) {
       const products = document.querySelectorAll('.product');
+      let visibleCount = 0;
+      
       products.forEach(p => {
         const cat = p.dataset.category;
         const br = p.dataset.brand;
+        
         if ((category && cat !== category) || (brand && br !== brand)) {
           p.classList.add('hidden');
         } else {
           p.classList.remove('hidden');
+          visibleCount++;
         }
       });
+      
+      // Update filter badges
+      if (category) {
+        categoryFilter.innerHTML = `<span>التصنيف: ${category}</span>`;
+        categoryFilter.classList.remove('empty');
+      } else {
+        categoryFilter.innerHTML = `<span>التصنيف: غير محدد</span>`;
+        categoryFilter.classList.add('empty');
+      }
+      
+      if (brand) {
+        brandFilter.innerHTML = `<span>الماركة: ${brand}</span>`;
+        brandFilter.classList.remove('empty');
+      } else {
+        brandFilter.innerHTML = `<span>الماركة: غير محددة</span>`;
+        brandFilter.classList.add('empty');
+      }
+      
+      return visibleCount;
     }
 
     let lastFilter = {};
+    let connectionStatus = 'connected';
 
-    async function checkFilterUpdate() {
-      try {
-        const res = await fetch('https://your-project-name.glitch.me/api/filter');
-        const filter = await res.json();
+    function updateConnectionStatus(status) {
+      statusDot.classList.remove('connecting', 'error');
+      
+      switch(status) {
+        case 'connected':
+          statusText.textContent = 'متصل بالخادم';
+          break;
+        case 'connecting':
+          statusText.textContent = 'جاري الاتصال...';
+          statusDot.classList.add('connecting');
+          break;
+        case 'error':
+          statusText.textContent = 'خطأ في الاتصال';
+          statusDot.classList.add('error');
+          break;
+      }
+      
+      connectionStatus = status;
+    }
+
+        async function checkFilterUpdate() {      try {        updateConnectionStatus('connecting');        // عندما يكون السيرفر جاهزًا على Glitch، استبدل الرابط التالي برابط مشروعك        const res = await fetch('https://your-project-name.glitch.me/api/filter');        const filter = await res.json();        updateConnectionStatus('connected');
 
         if (JSON.stringify(filter) !== JSON.stringify(lastFilter)) {
           lastFilter = filter;
@@ -48,9 +331,14 @@
         }
       } catch (error) {
         console.error('Error fetching filter:', error);
+        updateConnectionStatus('error');
       }
     }
 
+    // Initial check
+    checkFilterUpdate();
+    
+    // Regular polling
     setInterval(checkFilterUpdate, 2000);
   </script>
 </body>
