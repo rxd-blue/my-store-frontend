@@ -323,7 +323,7 @@
       connectionStatus = status;
     }
 
-        async function checkFilterUpdate() {      try {        updateConnectionStatus('connecting');        // عندما يكون السيرفر جاهزًا على Glitch، استبدل الرابط التالي برابط مشروعك        const res = await fetch('https://your-project-name.glitch.me/api/filter');        const filter = await res.json();        updateConnectionStatus('connected');
+        async function checkFilterUpdate() {      try {        updateConnectionStatus('connecting');        // تم ربط السيرفر بنجاح        const res = await fetch('https://piquant-elderly-staircase.glitch.me/api/filter');        const filter = await res.json();        updateConnectionStatus('connected');
 
         if (JSON.stringify(filter) !== JSON.stringify(lastFilter)) {
           lastFilter = filter;

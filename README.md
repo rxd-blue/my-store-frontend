@@ -33,7 +33,7 @@ git clone https://github.com/rxd-blue/my-store-frontend.git
 عدّل الرابط في ملف `index.html` ليشير إلى سيرفر Glitch الخاص بك:
 
 ```javascript
-const res = await fetch('https://your-project-name.glitch.me/api/filter');
+const res = await fetch('https://piquant-elderly-staircase.glitch.me/api/filter');
 ```
 
 ## الاتصال بالسيرفر
@@ -41,7 +41,7 @@ const res = await fetch('https://your-project-name.glitch.me/api/filter');
 لاختبار الموقع مع السيرفر، يمكنك إرسال طلب باستخدام:
 
 ```bash
-curl -X POST https://your-project-name.glitch.me/api/filter \
+curl -X POST https://piquant-elderly-staircase.glitch.me/api/filter \
   -H "Content-Type: application/json" \
   -d '{"category": "تليفونات", "brand": "سامسونج"}'
 ```
