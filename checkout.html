@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الطلب - متجر المنتجات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a6da7;
+            --secondary-color: #5d93d8;
+            --accent-color: #ff6b6b;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .selected-products {
+            margin-bottom: 2rem;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            gap: 1rem;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .product-details {
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .total-section {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        #success-message {
+            display: none;
+            text-align: center;
+            color: #28a745;
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid #28a745;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مراجعة وتأكيد الطلب</h1>
+        
+        <div class="selected-products" id="selected-products">
+            <!-- Products will be inserted here dynamically -->
+        </div>
+
+        <div class="total-section">
+            <h3>إجمالي الطلب: <span id="total-amount">0</span> ريال</h3>
+        </div>
+
+        <div id="loading">جاري معالجة طلبك...</div>
+        <div id="success-message">تم تأكيد طلبك بنجاح!</div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">العودة للمتجر</button>
+            <button class="btn btn-primary" onclick="confirmOrder()">تأكيد الطلب</button>
+        </div>
+    </div>
+
+    <script>
+        // Get selected products from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedProducts = JSON.parse(decodeURIComponent(urlParams.get('products') || '[]'));
+
+        // Display selected products
+        function displayProducts() {
+            const productsContainer = document.getElementById('selected-products');
+            let total = 0;
+
+            selectedProducts.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.className = 'product-item';
+                productElement.innerHTML = `
+                    <img src="${product.image || 'https://picsum.photos/80/80'}" class="product-image" alt="${product.name}">
+                    <div class="product-details">
+                        <div class="product-title">${product.name}</div>
+                        <div class="product-price">${product.price} ريال</div>
+                    </div>
+                `;
+                productsContainer.appendChild(productElement);
+                total += parseFloat(product.price);
+            });
+
+            document.getElementById('total-amount').textContent = total.toFixed(2);
+        }
+
+        // Handle order confirmation
+        async function confirmOrder() {
+            const loading = document.getElementById('loading');
+            const successMessage = document.getElementById('success-message');
+            const buttons = document.querySelectorAll('.btn');
+
+            // Disable buttons and show loading
+            buttons.forEach(btn => btn.disabled = true);
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/confirm-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        products: selectedProducts
+                    })
+                });
+
+                if (response.ok) {
+                    loading.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                } else {
+                    throw new Error('Failed to confirm order');
+                }
+            } catch (error) {
+                console.error('Error confirming order:', error);
+                loading.textContent = 'حدث خطأ أثناء تأكيد الطلب. يرجى المحاولة مرة أخرى.';
+            }
+        }
+
+        // Initialize page
+        displayProducts();
+    </script>
+</body>
+</html> 

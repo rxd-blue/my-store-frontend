@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>متجر المنتجات</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Botpress Webchat Scripts -->
+  <script src="https://cdn.botpress.cloud/webchat/v2.5/inject.js"></script>
+  <script src="https://files.bpcontent.cloud/2025/05/16/15/20250516151504-NOZ5039Y.js"></script>
   <style>
     :root {
       --primary-color: #4a6da7;
@@ -165,6 +168,11 @@
       background-color: #dc3545;
     }
     
+    /* Ensure Botpress webchat is always visible */
+    .bp-widget {
+      z-index: 9999 !important;
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .products-grid {
@@ -185,6 +193,31 @@
       .products-grid {
         grid-template-columns: 1fr;
       }
+    }
+
+    /* Add styles for chatbot integration */
+    .chatbot-helper {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      box-shadow: var(--card-shadow);
+      display: none;
+      z-index: 1000;
+    }
+
+    .chatbot-helper.visible {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -207,139 +240,101 @@
       </div>
     </div>
 
-    <div class="products-grid">
-      <div class="product" data-category="تليفونات" data-brand="سامسونج">
-        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=1')"></div>
-        <div class="product-info">
-          <h3 class="product-title">Samsung A23</h3>
-          <p>هاتف ذكي بمواصفات رائعة وأداء فائق.</p>
-          <div class="product-meta">
-            <span class="badge">تليفونات</span>
-            <span>سامسونج</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="product" data-category="تليفونات" data-brand="شاومي">
-        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=2')"></div>
-        <div class="product-info">
-          <h3 class="product-title">Xiaomi Note 12</h3>
-          <p>هاتف اقتصادي بمواصفات ممتازة وبطارية قوية.</p>
-          <div class="product-meta">
-            <span class="badge">تليفونات</span>
-            <span>شاومي</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="product" data-category="غسالات" data-brand="LG">
-        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=3')"></div>
-        <div class="product-info">
-          <h3 class="product-title">LG WashPro</h3>
-          <p>غسالة أوتوماتيك بسعة كبيرة وكفاءة عالية.</p>
-          <div class="product-meta">
-            <span class="badge">غسالات</span>
-            <span>LG</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="product" data-category="غسالات" data-brand="سامسونج">
-        <div class="product-image" style="background-image: url('https://picsum.photos/500/300?random=4')"></div>
-        <div class="product-info">
-          <h3 class="product-title">Samsung WashX</h3>
-          <p>غسالة بتصميم عصري وتقنيات توفير الطاقة.</p>
-          <div class="product-meta">
-            <span class="badge">غسالات</span>
-            <span>سامسونج</span>
-          </div>
-        </div>
-      </div>
+    <div class="products-grid" id="products-grid">
+      <!-- Products will be loaded dynamically -->
+    </div>
+
+    <div class="chatbot-helper" id="chatbot-helper">
+      مرحباً! يمكنك التحدث معي لمساعدتك في اختيار المنتجات
     </div>
   </div>
 
   <script>
+    // Initialize connection status
     const statusDot = document.querySelector('.status-dot');
     const statusText = document.querySelector('.status-text');
-    const categoryFilter = document.getElementById('category-filter');
-    const brandFilter = document.getElementById('brand-filter');
-    
-    function filterProducts(category, brand) {
-      const products = document.querySelectorAll('.product');
-      let visibleCount = 0;
-      
-      products.forEach(p => {
-        const cat = p.dataset.category;
-        const br = p.dataset.brand;
-        
-        if ((category && cat !== category) || (brand && br !== brand)) {
-          p.classList.add('hidden');
-        } else {
-          p.classList.remove('hidden');
-          visibleCount++;
-        }
-      });
-      
-      // Update filter badges
-      if (category) {
-        categoryFilter.innerHTML = `<span>التصنيف: ${category}</span>`;
-        categoryFilter.classList.remove('empty');
-      } else {
-        categoryFilter.innerHTML = `<span>التصنيف: غير محدد</span>`;
-        categoryFilter.classList.add('empty');
-      }
-      
-      if (brand) {
-        brandFilter.innerHTML = `<span>الماركة: ${brand}</span>`;
-        brandFilter.classList.remove('empty');
-      } else {
-        brandFilter.innerHTML = `<span>الماركة: غير محددة</span>`;
-        brandFilter.classList.add('empty');
-      }
-      
-      return visibleCount;
-    }
+    const productsGrid = document.getElementById('products-grid');
+    const chatbotHelper = document.getElementById('chatbot-helper');
 
-    let lastFilter = {};
-    let connectionStatus = 'connected';
+    let products = [];
 
-    function updateConnectionStatus(status) {
-      statusDot.classList.remove('connecting', 'error');
-      
-      switch(status) {
-        case 'connected':
-          statusText.textContent = 'متصل بالخادم';
-          break;
-        case 'connecting':
-          statusText.textContent = 'جاري الاتصال...';
-          statusDot.classList.add('connecting');
-          break;
-        case 'error':
-          statusText.textContent = 'خطأ في الاتصال';
-          statusDot.classList.add('error');
-          break;
-      }
-      
-      connectionStatus = status;
-    }
-
-        async function checkFilterUpdate() {      try {        updateConnectionStatus('connecting');        // تم ربط السيرفر بنجاح        const res = await fetch('https://piquant-elderly-staircase.glitch.me/api/filter');        const filter = await res.json();        updateConnectionStatus('connected');
-
-        if (JSON.stringify(filter) !== JSON.stringify(lastFilter)) {
-          lastFilter = filter;
-          filterProducts(filter.category, filter.brand);
-        }
+    // Load and display products
+    async function loadProducts() {
+      try {
+        const response = await fetch('http://localhost:3000/api/products');
+        products = await response.json();
+        displayProducts(products);
+        updateConnectionStatus(true);
       } catch (error) {
-        console.error('Error fetching filter:', error);
-        updateConnectionStatus('error');
+        console.error('Error loading products:', error);
+        updateConnectionStatus(false);
       }
     }
 
-    // Initial check
-    checkFilterUpdate();
-    
-    // Regular polling
-    setInterval(checkFilterUpdate, 2000);
+    function displayProducts(products) {
+      productsGrid.innerHTML = products.map(product => `
+        <div class="product" data-category="${product.category}" data-brand="${product.brand}">
+          <div class="product-image" style="background-image: url('${product.image}')"></div>
+          <div class="product-info">
+            <h3 class="product-title">${product.name}</h3>
+            <p>${product.description}</p>
+            <div class="product-meta">
+              <span class="badge">${product.category}</span>
+              <span>${product.brand}</span>
+            </div>
+            <div class="product-price">${product.price} ريال</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateConnectionStatus(connected) {
+      if (connected) {
+        statusDot.classList.remove('error');
+        statusText.textContent = 'متصل بالخادم';
+      } else {
+        statusDot.classList.add('error');
+        statusText.textContent = 'غير متصل بالخادم';
+      }
+    }
+
+    // Show chatbot helper after a delay
+    setTimeout(() => {
+      chatbotHelper.classList.add('visible');
+    }, 3000);
+
+    // Handle chatbot events
+    window.botpressWebChat.onEvent(async (event) => {
+      if (event.type === 'message' && event.direction === 'incoming') {
+        // Process user message for product selection
+        const message = event.payload.text.toLowerCase();
+        
+        try {
+          const response = await fetch('http://localhost:3000/api/chatbot/select-products', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              productNames: [message]
+            })
+          });
+
+          const result = await response.json();
+          
+          if (result.success && result.products.length > 0) {
+            // Redirect to checkout page with selected products
+            const productsParam = encodeURIComponent(JSON.stringify(result.products));
+            window.location.href = `checkout.html?products=${productsParam}`;
+          }
+        } catch (error) {
+          console.error('Error processing chatbot selection:', error);
+        }
+      }
+    });
+
+    // Initialize
+    loadProducts();
   </script>
 </body>
 </html> 
